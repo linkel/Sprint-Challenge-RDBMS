@@ -48,6 +48,26 @@ server.post('/api/projects', (req, res) => {
     }
   })
 
+  server.get('/api/projects/:id', (req, res) => {
+      const id = req.params.id;
+      db("projects").where("id",id)
+      .then(proj => {
+          db("actions").where("project_id",id)
+          .then(actions => {
+              let obj = proj;
+              let actions_obj = actions;
+              let new_obj = Object.assign(obj[0], {actions:actions_obj})
+              res.status(200).json(new_obj);
+          })
+          .catch(err => {
+              res.status(500).json({error: "Could not get from actions table."})
+          })
+      })
+      .catch(err => {
+          console.log(err);
+          res.status(500).json({error: "Could not get from projects table"})
+      })
+  })
 
 const port = 4000;
 server.listen(port, () => console.log(`Server is now running on ${port}!`));
